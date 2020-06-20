@@ -1,42 +1,69 @@
 import { IObject } from './IObject';
 import { ConvertToOptions } from './IConvert';
+import { Validator } from './Validator';
 
-const object: IObject = {
-  name: 'first name',
+const object: any = {
+  name: null,
   last_name: 'last name',
   phone: '+54',
-  cellphone: '+595',
-  is_company: false,
+  cellphone: null,
+  is_company: true,
+  comments: 'a',
 };
 
 const objectModel: ConvertToOptions<IObject> = {
   name: {
+    allowNull: true,
     type: 'string',
-    allowNull: false,
-    allowEmpty: true,
-    depends: ['last_name'],
   },
   last_name: {
+    allowNull: true,
     type: 'string',
-    allowEmpty: false,
-    allowNull: false,
-    depends: [{ is_company: { status: 'present', value: false } }],
+    depends: [
+      {
+        is_company: {
+          status: 'present',
+          validate: 'ifValue',
+          requiredValue: false,
+        },
+      },
+    ],
   },
   phone: {
+    allowNull: true,
     type: 'string',
-    allowNull: false,
-    allowEmpty: true,
-    depends: [{ cellphone: { status: 'absent' } }],
+    depends: [
+      {
+        cellphone: {
+          status: 'present',
+          validate: 'ifNotValue',
+          requiredValue: null,
+        },
+      },
+    ],
   },
   cellphone: {
+    allowNull: true,
     type: 'string',
-    allowNull: false,
-    allowEmpty: true,
-    depends: [{ phone: { status: 'absent' } }],
   },
   is_company: {
-    type: 'boolean',
     allowNull: false,
-    depends: [{ name: { status: 'present', value: 'google' } }],
+    type: 'boolean',
+    depends: [
+      {
+        name: {
+          status: 'present',
+          validate: 'ifValue',
+          requiredValue: 'google',
+        },
+      },
+    ],
+  },
+  comments: {
+    allowNull: true,
+    type: 'string',
+    depends: 'phone',
   },
 };
+
+Validator(object, objectModel);

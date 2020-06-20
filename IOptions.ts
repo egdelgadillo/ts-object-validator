@@ -1,16 +1,17 @@
 import { IDepends } from './IDepends';
 
-interface IOptionsGeneral<T> {
-  allowNull: boolean;
-  type: 'number' | 'boolean' | string[] | number[];
-  depends?: IDepends<T>[];
+interface IOptionsRequired<T extends object> {
+  alwaysPresent: boolean;
+  type: 'string' | 'number' | 'boolean' | string[] | number[];
+  depends?: IDepends<T>;
 }
 
-interface IOptionsString<T> {
+interface IOptionsNotRequired<T extends object> {
   allowNull: boolean;
-  allowEmpty: boolean;
-  type: 'string';
-  depends?: IDepends<T>[] | keyof Partial<T>;
+  type: 'string' | 'number' | 'boolean' | string[] | number[];
+  depends?: IDepends<T>;
 }
 
-export type IOptions<T> = IOptionsGeneral<T> | IOptionsString<T>;
+export type IOptions<T extends object> =
+  | IOptionsRequired<T>
+  | IOptionsNotRequired<T>;

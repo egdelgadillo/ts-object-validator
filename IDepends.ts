@@ -1,9 +1,27 @@
-type IDependsObject<T> = {
-  [K in keyof Partial<T>]: {
-    status: 'present' | 'absent' | 'exclusive';
-    value?: any;
-  };
+type IDependsObjectPresentValue<T> = {
+  status: 'present';
+  validate: 'ifNotValue';
+  requiredValue: any;
 };
-type IDependsString<T> = keyof Partial<T>;
 
-export type IDepends<T> = IDependsObject<T> | IDependsString<T>;
+type IDependsObjectPresentNotValue<T> = {
+  status: 'present';
+  validate: 'ifValue';
+  requiredValue: any;
+};
+
+type IDependsObjectPresent<T> =
+  | IDependsObjectPresentValue<T>
+  | IDependsObjectPresentNotValue<T>;
+
+type IDependsObjectAbsent<T> = {
+  status: 'absent';
+};
+
+type IDependsObject<T> = {
+  [K in keyof Partial<T>]: IDependsObjectPresent<T> | IDependsObjectAbsent<T>;
+};
+
+export type IDepends<T extends object> =
+  | (IDependsObject<T> | keyof Partial<T>)[]
+  | keyof Partial<T>;
