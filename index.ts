@@ -60,7 +60,7 @@ const objectModel: ConvertToOptions<IObject> = {
     oneOf: ['phone'],
   },
   is_company: {
-    allowNull: false,
+    alwaysPresent: true,
     type: 'boolean',
     depends: [
       {
