@@ -1,0 +1,5 @@
+# Usage
+
+```
+ts-node index
+```
