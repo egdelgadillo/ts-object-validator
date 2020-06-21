@@ -1,5 +1,4 @@
 import { IOptions } from './IOptions';
-import { IObject } from './IObject';
 
 export const Validator = (
   object: object,
@@ -8,7 +7,6 @@ export const Validator = (
   for (const propertyName in model) {
     const modelProperty = model[propertyName];
     const objectPropertyValue = object[propertyName];
-    const dependencies = modelProperty.depends;
 
     // Check if required properties are present
     if (
@@ -36,17 +34,38 @@ export const Validator = (
       );
     }
 
-    // We skip properties if are not required and are not present
+    if (
+      !(propertyName in object) &&
+      'oneOf' in modelProperty &&
+      modelProperty.oneOf.length > 0
+    ) {
+      let presentProperties = false;
+      for (const propertyName in modelProperty) {
+        if (propertyName in object) {
+          presentProperties = true;
+        }
+      }
+      if (!presentProperties) {
+        console.log(
+          'ERROR: None of the optional properties defined by "',
+          propertyName,
+          '" are present.'
+        );
+      }
+    }
+
     if (!('alwaysPresent' in modelProperty) && !(propertyName in object)) {
+      // We skip properties if are not required and are not present
       continue;
     }
+
     const allowNull =
       'alwaysPresent' in modelProperty ? false : modelProperty.allowNull;
 
     // Validate the property type
     if (
-      typeof objectPropertyValue !== modelProperty.type ||
-      (!allowNull && objectPropertyValue == null)
+      typeof objectPropertyValue !== modelProperty.type &&
+      !(allowNull && objectPropertyValue == null)
     ) {
       console.log('ERROR: Property "', propertyName, '" type is invalid');
     }
@@ -63,12 +82,9 @@ export const Validator = (
       console.log('ERROR: Property "', propertyName, '" is a negative number');
     }
 
-    // If there are no dependencies we continue to the next model property
-    if (!('depends' in modelProperty)) continue;
-
     // If the dependencies is an array or strings and/or objects
-    if (typeof dependencies === 'object') {
-      dependencies.forEach((dependency) => {
+    if (typeof modelProperty.depends === 'object') {
+      modelProperty.depends.forEach((dependency) => {
         // If the dependency is an object
         if (typeof dependency === 'object') {
           const dependencyName = Object.keys(dependency)[0];
@@ -154,8 +170,8 @@ export const Validator = (
     }
 
     // If the dependency is a single string
-    if (typeof dependencies === 'string') {
-      const dependencyName = dependencies;
+    if (typeof modelProperty.depends === 'string') {
+      const dependencyName = modelProperty.depends;
       if (
         !(dependencyName in object) ||
         (object[dependencyName] !== 0 && !object[dependencyName])
