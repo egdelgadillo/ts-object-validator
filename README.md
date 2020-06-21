@@ -7,14 +7,14 @@ The object validator is used to verify an object by creating a model of the obje
 An example of an object and the model is provided in the `index.ts` file. To run the project you can run it directly using **ts-node**:
 
 ```bash
-ts-node index
+ts-node src/index
 ```
 
 or by compiling it and running it with node:
 
 ```bash
 tsc
-node index.js
+node src/index.js
 ```
 
 The Validator prints the errors to the console instead of throwing errors. This may be changed in the future. By default the example will print **3 errors** (That's normal):
