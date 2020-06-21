@@ -1,8 +1,18 @@
-import { IObject } from './IObject';
 import { ConvertToOptions } from './ConvertToOptions';
-import { Validator } from './Validator';
+import { ValidateObject } from './Validator';
 
-const object: any = {
+// We declare the object interface.
+export interface IObject {
+  name: string;
+  last_name?: string;
+  phone?: string;
+  cellphone?: string;
+  is_company: boolean;
+  comments?: string;
+}
+
+// We create an object to validate.
+const object: IObject = {
   name: null,
   last_name: 'last name',
   phone: '+54',
@@ -11,6 +21,7 @@ const object: any = {
   comments: 'a',
 };
 
+// We create a model to validate the object.
 const objectModel: ConvertToOptions<IObject> = {
   name: {
     allowNull: true,
@@ -68,4 +79,6 @@ const objectModel: ConvertToOptions<IObject> = {
   },
 };
 
-Validator(object, objectModel);
+// Call the validator with the object to test
+// and the model to validate it with.
+ValidateObject(object, objectModel);

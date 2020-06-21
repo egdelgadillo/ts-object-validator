@@ -22,6 +22,6 @@ type IDependsObject<T> = {
   [K in keyof Partial<T>]: IDependsObjectPresent<T> | IDependsObjectAbsent<T>;
 };
 
-export type IDepends<T extends object> =
+export type IDepends<T> =
   | (IDependsObject<T> | keyof Partial<T>)[]
   | keyof Partial<T>;

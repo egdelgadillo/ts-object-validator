@@ -1,6 +1,6 @@
 import { IOptions } from './IOptions';
 
-export const Validator = (
+export const ValidateObject = (
   object: object,
   model: { [key: string]: IOptions<{ [key: string]: string }> }
 ) => {
@@ -34,6 +34,7 @@ export const Validator = (
       );
     }
 
+    // Check if one of the optional properties is present
     if (
       !(propertyName in object) &&
       'oneOf' in modelProperty &&
@@ -54,8 +55,8 @@ export const Validator = (
       }
     }
 
+    // We skip properties if are not required and are not present
     if (!('alwaysPresent' in modelProperty) && !(propertyName in object)) {
-      // We skip properties if are not required and are not present
       continue;
     }
 
@@ -88,10 +89,10 @@ export const Validator = (
         // If the dependency is an object
         if (typeof dependency === 'object') {
           const dependencyName = Object.keys(dependency)[0];
-          const dependencyRequirements = dependency[dependencyName];
+          const dependencyOptions = dependency[dependencyName];
           // Check if the dependency property is absent
           if (
-            dependencyRequirements.status === 'absent' &&
+            dependencyOptions.status === 'absent' &&
             dependencyName in object
           ) {
             console.log(
@@ -105,8 +106,8 @@ export const Validator = (
 
           // Check if dependency meets required value
           if (
-            dependencyRequirements.status === 'present' &&
-            dependencyRequirements.validate === 'ifValue'
+            dependencyOptions.status === 'present' &&
+            dependencyOptions.validate === 'ifValue'
           ) {
             // Check if the dependency is present
             if (!(dependencyName in object)) {
@@ -114,9 +115,7 @@ export const Validator = (
             }
 
             // Check if the dependency has required value
-            if (
-              object[dependencyName] !== dependencyRequirements.requiredValue
-            ) {
+            if (object[dependencyName] !== dependencyOptions.requiredValue) {
               console.log(
                 'ERROR: Property "',
                 propertyName,
@@ -129,8 +128,8 @@ export const Validator = (
 
           // Check if dependency meets required NOT value
           if (
-            dependencyRequirements.status === 'present' &&
-            dependencyRequirements.validate === 'ifNotValue'
+            dependencyOptions.status === 'present' &&
+            dependencyOptions.validate === 'ifNotValue'
           ) {
             // Check if the dependency is present
             if (!(dependencyName in object)) {
@@ -138,9 +137,7 @@ export const Validator = (
             }
 
             // Check if the dependency has not required value
-            if (
-              object[dependencyName] === dependencyRequirements.requiredValue
-            ) {
+            if (object[dependencyName] === dependencyOptions.requiredValue) {
               console.log(
                 'ERROR: Property "',
                 propertyName,
