@@ -1,5 +1,5 @@
-import { ConvertToOptions } from './ConvertToOptions';
-import { ValidateObject } from './Validator';
+import { ConvertToOptions } from './utils/ConvertToOptions';
+import { ValidateObject } from './utils/Validator';
 
 // We declare the object interface.
 export interface IObject {

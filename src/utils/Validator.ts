@@ -1,4 +1,4 @@
-import { IOptions } from './IOptions';
+import { IOptions } from '../types/IOptions';
 import { ConvertToOptions } from './ConvertToOptions';
 
 export const ValidateObject = (
