@@ -4,6 +4,11 @@ import { Validator } from './Validator';
 
 const object: any = {
   name: null,
+  last_name: 'last name',
+  phone: '+54',
+  cellphone: null,
+  is_company: true,
+  comments: 'a',
 };
 
 const objectModel: ConvertToOptions<IObject> = {
