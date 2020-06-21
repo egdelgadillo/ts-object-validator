@@ -12,7 +12,7 @@ export interface IObject {
 }
 
 // We create an object to validate.
-const object: IObject = {
+const object: any = {
   name: null,
   last_name: 'last name',
   phone: '+54',

@@ -1,8 +1,9 @@
 import { IOptions } from './IOptions';
+import { ConvertToOptions } from './ConvertToOptions';
 
 export const ValidateObject = (
-  object: object,
-  model: { [key: string]: IOptions<{ [key: string]: string }> }
+  object: { [key: string]: any },
+  model: ConvertToOptions<any>
 ) => {
   for (const propertyName in model) {
     const modelProperty = model[propertyName];
@@ -38,6 +39,7 @@ export const ValidateObject = (
     if (
       !(propertyName in object) &&
       'oneOf' in modelProperty &&
+      modelProperty.oneOf &&
       modelProperty.oneOf.length > 0
     ) {
       let presentProperties = false;
