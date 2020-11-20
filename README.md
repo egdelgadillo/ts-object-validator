@@ -2,6 +2,14 @@
 
 The object validator is used to verify an object by creating a model of the object containing the required property types and using those two to call it.
 
+## Use Cases
+
+This is very useful when needing to validate objects coming from the APIs, making the validation easier and the validation code shorter and clearer.
+
+## What I Learned
+
+Making this project I strengthened my typescript **Interfaces** skills. The goal I set while seting up this project was to avoid the use of the **any** type as much as possible, except in the places where it was really needed.
+
 ## Usage
 
 An example of an object and the model is provided in the `index.ts` file. To run the project you can run it directly using **ts-node**:
@@ -105,3 +113,7 @@ const model = {
   },
 };
 ```
+
+## Collaborating
+
+The perfect place for collaboration is the [development](https://github.com/egdelgadillo/ts-object-validator/tree/develop) branch.
