@@ -1,9 +1,19 @@
-import { IOptions } from '../types/IOptions';
 import { ConvertToOptions } from './ConvertToOptions';
+
+const handleError = (
+  errorMessage: string,
+  options?: { exitOnError: boolean }
+) => {
+  if (options?.exitOnError) {
+    throw new Error(errorMessage);
+  }
+  console.error(`Error: ${errorMessage}`);
+};
 
 export const ValidateObject = (
   object: { [key: string]: any },
-  model: ConvertToOptions<any>
+  model: ConvertToOptions<any>,
+  options?: { exitOnError: boolean }
 ) => {
   for (const propertyName in model) {
     const modelProperty = model[propertyName];
@@ -15,10 +25,9 @@ export const ValidateObject = (
       modelProperty.alwaysPresent &&
       !(propertyName in object)
     ) {
-      console.log(
-        'ERROR: Property "',
-        propertyName,
-        '" is required but not present'
+      handleError(
+        `Property "${propertyName}" is required but not present`,
+        options
       );
     }
 
@@ -28,10 +37,9 @@ export const ValidateObject = (
       modelProperty.alwaysPresent &&
       object[propertyName] == null
     ) {
-      console.log(
-        'ERROR: Property "',
-        propertyName,
-        '" is required and cannot be null'
+      handleError(
+        `Property "${propertyName}" is required and cannot be null`,
+        options
       );
     }
 
@@ -49,10 +57,9 @@ export const ValidateObject = (
         }
       }
       if (!presentProperties) {
-        console.log(
-          'ERROR: None of the optional properties defined by "',
-          propertyName,
-          '" are present.'
+        handleError(
+          `None of the optional properties defined by "${propertyName}" are present.`,
+          options
         );
       }
     }
@@ -70,19 +77,23 @@ export const ValidateObject = (
       typeof objectPropertyValue !== modelProperty.type &&
       !(allowNull && objectPropertyValue == null)
     ) {
-      console.log('ERROR: Property "', propertyName, '" type is invalid');
+      handleError(`Property "${propertyName}" type is invalid.`, options);
     }
 
     // Check if string properties are empty strings
     if (modelProperty.type === 'string' && objectPropertyValue === '') {
       // Check if String properties are empty
-      console.log('ERROR: Property "', propertyName, '" is empty');
+
+      handleError(`Property "${propertyName}" is empty.`, options);
     }
 
     // Check if number properties are negative numbers
     if (modelProperty.type === 'number' && objectPropertyValue < 0) {
       // Check if String properties are empty
-      console.log('ERROR: Property "', propertyName, '" is a negative number');
+      handleError(
+        `Property "${propertyName}" cannot be a negative number.`,
+        options
+      );
     }
 
     // If the dependencies is an array or strings and/or objects
@@ -97,12 +108,9 @@ export const ValidateObject = (
             dependencyOptions.status === 'absent' &&
             dependencyName in object
           ) {
-            console.log(
-              'ERROR: Property "',
-              dependencyName,
-              '" should not be present for "',
-              propertyName,
-              "' to be valid."
+            handleError(
+              `Property "${dependencyName}" should not be present for "${propertyName}" to be valid.`,
+              options
             );
           }
 
@@ -113,17 +121,14 @@ export const ValidateObject = (
           ) {
             // Check if the dependency is present
             if (!(dependencyName in object)) {
-              console.log('ERROR: Property "', dependencyName, '" is missing');
+              handleError(`Property "${dependencyName}" is missing.`, options);
             }
 
             // Check if the dependency has required value
             if (object[dependencyName] !== dependencyOptions.requiredValue) {
-              console.log(
-                'ERROR: Property "',
-                propertyName,
-                '" requires "',
-                dependencyName,
-                '" to have another value'
+              handleError(
+                `Property "${propertyName}" requires "${dependencyName}" to have another value.`,
+                options
               );
             }
           }
@@ -135,17 +140,14 @@ export const ValidateObject = (
           ) {
             // Check if the dependency is present
             if (!(dependencyName in object)) {
-              console.log('ERROR: Property "', dependencyName, '" is missing');
+              handleError(`Property "${dependencyName}" is missing.`, options);
             }
 
             // Check if the dependency has not required value
             if (object[dependencyName] === dependencyOptions.requiredValue) {
-              console.log(
-                'ERROR: Property "',
-                propertyName,
-                '" requires "',
-                dependencyName,
-                '" to have another value'
+              handleError(
+                `Property "${propertyName}" requires "${dependencyName}" to have another value.`,
+                options
               );
             }
           }
@@ -158,10 +160,9 @@ export const ValidateObject = (
             !(dependencyName in object) ||
             (object[dependencyName] !== 0 && !object[dependencyName])
           ) {
-            console.log(
-              'ERROR: Property "',
-              dependencyName,
-              '" is missing or null.'
+            handleError(
+              `Property "${dependencyName}" is missing or null.`,
+              options
             );
           }
         }
@@ -175,10 +176,9 @@ export const ValidateObject = (
         !(dependencyName in object) ||
         (object[dependencyName] !== 0 && !object[dependencyName])
       ) {
-        console.log(
-          'ERROR: Property "',
-          dependencyName,
-          '" is missing or null.'
+        handleError(
+          `Property "${dependencyName}" is missing or null.`,
+          options
         );
       }
     }
