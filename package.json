@@ -1,7 +1,7 @@
 {
   "name": "@egdelgadillo/ts-object-parser",
-  "version": "1.0.0",
-  "description": "Verify not trusted object from external APIs using a model-based validator",
+  "version": "1.0.1",
+  "description": "Verify not trusted object from external APIs using a model-based validator. This is part of my portfolio. Check it out at https://github.com/egdelgadillo",
   "main": "dist/index.js",
   "scripts": {
     "start": "tsc && node dist/example.js",
@@ -16,5 +16,6 @@
     "jest": "^26.6.3",
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
-  }
+  },
+  "dependencies": {}
 }
