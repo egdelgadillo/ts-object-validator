@@ -1,5 +1,5 @@
 {
-  "name": "ts-object-parser",
+  "name": "@egdelgadillo/ts-object-parser",
   "version": "1.0.0",
   "description": "Verify not trusted object from external APIs using a model-based validator",
   "main": "dist/index.js",
