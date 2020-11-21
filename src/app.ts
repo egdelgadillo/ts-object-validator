@@ -16,7 +16,7 @@ interface IObject {
 const object = {
   name: null,
   last_name: 'last name',
-  phone: '+54',
+  phone: '+595 888 7777',
   cellphone: null,
   is_company: true,
   comments: 'a',

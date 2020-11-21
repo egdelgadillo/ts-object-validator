@@ -2,6 +2,16 @@
 
 The object validator is used to verify a _not trusted_ object, coming from external APIs, by using a pre-defined model with specific rules that object **should** follow.
 
+## Table of Contents
+
+- [Table of Contents](#table-of-contents)
+- [Use Cases](#use-cases)
+- [What I Learned](#what-i-learned)
+- [Usage](#usage)
+- [Validator Model features](#validator-model-features)
+- [Examples](#examples)
+- [Collaborating](#collaborating)
+
 ## Use Cases
 
 **Object Validator** is very useful when needing to validate objects coming from the APIs, making the validation easier and the validation code shorter and clearer. The model manages to condense the rules necessary to consider an object as valid in as minimum lines as possible and very easy to read as it is basically a javascript object.

@@ -26,7 +26,7 @@ export const ValidateObject = (
       !(propertyName in object)
     ) {
       handleError(
-        `Property "${propertyName}" is required but not present`,
+        `Property "${propertyName}" is required but not present.`,
         options
       );
     }
@@ -38,20 +38,20 @@ export const ValidateObject = (
       object[propertyName] == null
     ) {
       handleError(
-        `Property "${propertyName}" is required and cannot be null`,
+        `Property "${propertyName}" is required and cannot be null.`,
         options
       );
     }
 
-    // Check if one of the optional properties is present
+    // Check if at least one of the optional properties is present
     if (
-      !(propertyName in object) &&
+      propertyName in object &&
       'oneOf' in modelProperty &&
       modelProperty.oneOf &&
       modelProperty.oneOf.length > 0
     ) {
       let presentProperties = false;
-      for (const propertyName in modelProperty) {
+      for (const propertyName of modelProperty.oneOf) {
         if (propertyName in object) {
           presentProperties = true;
         }
