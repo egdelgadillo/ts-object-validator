@@ -220,4 +220,4 @@ The perfect place for collaboration is the [development](https://github.com/egde
 
 ## License
 
-This work is licensed under a [GNU GENERAL PUBLIC LICENSE](https://github.com/egdelgadillo/ts-object-validator/LICENSE).
+This work is licensed under a [GNU GENERAL PUBLIC LICENSE](LICENSE).
