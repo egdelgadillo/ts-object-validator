@@ -33,9 +33,9 @@ The object validator is used to verify a _not trusted_ object, coming from exter
 
   A very important part of each project is testing. This project is no stranger to unit testing using Jest. This project helped me remember the importance to apply unit testing in all of my projects, even personal ones.
 
-- **NPM Packages**
+- **NPM Packages and Github Actions**
 
-  I provide this project as an npm package. This was the first time I created an NPM package and published it. A nice guide can be found [here](https://gist.github.com/coolaj86/1318304/27bc153c639dbbb7dee17c16bf4d5108afe28b44) for manual publish or [here](https://github.com/marketplace/actions/publish-to-npm) if you want github to handle the publications to NPM.
+  I provide this project as an npm package. This was the first time I created an NPM package and published it. A nice guide can be found [here](https://gist.github.com/coolaj86/1318304/27bc153c639dbbb7dee17c16bf4d5108afe28b44) for manual publish or [here](https://github.com/marketplace/actions/publish-to-npm) if you want github to handle the publications to NPM. The other thing I learned in this project is how to handle automatic Github Actions to publish a package to NPM as a **scoped** package.
 
 - Documentation
 
