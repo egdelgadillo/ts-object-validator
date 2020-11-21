@@ -50,13 +50,16 @@ The object validator is used to verify a _not trusted_ object, coming from exter
 1. Install the package
 
 ```bash
-npm install --save ts-object-validator
+npm install --save @egdelgadillo/ts-object-validator
 ```
 
 2. We import the required methods and types
 
 ```typescript
-import { ConvertToOptions, ValidateObject } from 'ts-object-validator';
+import {
+  ConvertToOptions,
+  ValidateObject,
+} from '@egdelgadillo/ts-object-validator';
 ```
 
 3. Create an Interface
