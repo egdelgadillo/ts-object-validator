@@ -34,9 +34,9 @@ const objectModel: ConvertToOptions<IObject> = {
     depends: [
       {
         is_company: {
-          status: 'present',
+          state: 'present',
           validate: 'ifValue',
-          requiredValue: false,
+          valueToTest: false,
         },
       },
     ],
@@ -47,9 +47,9 @@ const objectModel: ConvertToOptions<IObject> = {
     depends: [
       {
         cellphone: {
-          status: 'present',
+          state: 'present',
           validate: 'ifNotValue',
-          requiredValue: null,
+          valueToTest: null,
         },
       },
     ],
@@ -64,13 +64,15 @@ const objectModel: ConvertToOptions<IObject> = {
     alwaysPresent: true,
     type: 'boolean',
     depends: [
+      // Can mix objects and strings in the array
       {
         name: {
-          status: 'present',
+          state: 'present',
           validate: 'ifValue',
-          requiredValue: 'google',
+          valueToTest: 'google',
         },
       },
+      'comments',
     ],
   },
   comments: {
@@ -82,4 +84,5 @@ const objectModel: ConvertToOptions<IObject> = {
 
 // Call the validator with the object to test
 // and the model to validate it with.
+// (This will fail with 3 errors)
 ValidateObject(object, objectModel, { exitOnError: false });

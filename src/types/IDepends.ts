@@ -1,13 +1,13 @@
 type IDependsObjectPresentValue<T> = {
-  status: 'present';
+  state: 'present';
   validate: 'ifNotValue';
-  requiredValue: any;
+  valueToTest: any;
 };
 
 type IDependsObjectPresentNotValue<T> = {
-  status: 'present';
+  state: 'present';
   validate: 'ifValue';
-  requiredValue: any;
+  valueToTest: any;
 };
 
 type IDependsObjectPresent<T> =
@@ -15,7 +15,7 @@ type IDependsObjectPresent<T> =
   | IDependsObjectPresentNotValue<T>;
 
 type IDependsObjectAbsent<T> = {
-  status: 'absent';
+  state: 'absent';
 };
 
 type IDependsObject<T> = {

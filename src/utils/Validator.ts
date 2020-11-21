@@ -64,8 +64,11 @@ export const ValidateObject = (
       }
     }
 
-    // We skip properties if are not required and are not present
-    if (!('alwaysPresent' in modelProperty) && !(propertyName in object)) {
+    // We skip properties if are not required or are not present
+    if (
+      !('alwaysPresent' in modelProperty && modelProperty.alwaysPresent) &&
+      !(propertyName in object)
+    ) {
       continue;
     }
 
@@ -97,73 +100,78 @@ export const ValidateObject = (
     }
 
     // If the dependencies is an array or strings and/or objects
-    if (typeof modelProperty.depends === 'object') {
-      modelProperty.depends.forEach((dependency) => {
-        // If the dependency is an object
-        if (typeof dependency === 'object') {
-          const dependencyName = Object.keys(dependency)[0];
-          const dependencyOptions = dependency[dependencyName];
-          // Check if the dependency property is absent
-          if (
-            dependencyOptions.status === 'absent' &&
-            dependencyName in object
-          ) {
-            handleError(
-              `Property "${dependencyName}" should not be present for "${propertyName}" to be valid.`,
-              options
-            );
-          }
-
-          // Check if dependency meets required value
-          if (
-            dependencyOptions.status === 'present' &&
-            dependencyOptions.validate === 'ifValue'
-          ) {
-            // Check if the dependency is present
-            if (!(dependencyName in object)) {
-              handleError(`Property "${dependencyName}" is missing.`, options);
-            }
-
-            // Check if the dependency has required value
-            if (object[dependencyName] !== dependencyOptions.requiredValue) {
+    if (Array.isArray(modelProperty.depends)) {
+      modelProperty.depends.forEach((dependencies) => {
+        // If the dependency is an object of properties
+        if (typeof dependencies === 'object') {
+          for (const dependencyPropertyName in dependencies) {
+            const dependencyOptions = dependencies[dependencyPropertyName];
+            // Check if the dependency property is absent
+            if (
+              dependencyOptions.state === 'absent' &&
+              dependencyPropertyName in object
+            ) {
               handleError(
-                `Property "${propertyName}" requires "${dependencyName}" to have another value.`,
+                `Property "${dependencyPropertyName}" should not be present for "${propertyName}" to be valid.`,
                 options
               );
             }
-          }
 
-          // Check if dependency meets required NOT value
-          if (
-            dependencyOptions.status === 'present' &&
-            dependencyOptions.validate === 'ifNotValue'
-          ) {
-            // Check if the dependency is present
-            if (!(dependencyName in object)) {
-              handleError(`Property "${dependencyName}" is missing.`, options);
+            // Check if dependency meets required value
+            if (
+              dependencyOptions.state === 'present' &&
+              dependencyOptions.validate === 'ifValue'
+            ) {
+              // Check if the dependency is present
+              if (!(dependencyPropertyName in object)) {
+                handleError(
+                  `Property "${dependencyPropertyName}" is missing.`,
+                  options
+                );
+              }
+
+              // Check if the dependency has required value
+              if (
+                object[dependencyPropertyName] !== dependencyOptions.valueToTest
+              ) {
+                handleError(
+                  `Property "${propertyName}" requires "${dependencyPropertyName}" to have another value.`,
+                  options
+                );
+              }
             }
 
-            // Check if the dependency has not required value
-            if (object[dependencyName] === dependencyOptions.requiredValue) {
-              handleError(
-                `Property "${propertyName}" requires "${dependencyName}" to have another value.`,
-                options
-              );
+            // Check if dependency does not meet required  value
+            if (
+              dependencyOptions.state === 'present' &&
+              dependencyOptions.validate === 'ifNotValue'
+            ) {
+              // Check if the dependency is present
+              if (!(dependencyPropertyName in object)) {
+                handleError(
+                  `Property "${dependencyPropertyName}" is missing.`,
+                  options
+                );
+              }
+
+              // Check if the dependency has not required value
+              if (
+                object[dependencyPropertyName] === dependencyOptions.valueToTest
+              ) {
+                handleError(
+                  `Property "${propertyName}" requires "${dependencyPropertyName}" to have another value.`,
+                  options
+                );
+              }
             }
           }
         }
 
         // Check if the dependency is a string
-        if (typeof dependency === 'string') {
-          const dependencyName = dependency;
-          if (
-            !(dependencyName in object) ||
-            (object[dependencyName] !== 0 && !object[dependencyName])
-          ) {
-            handleError(
-              `Property "${dependencyName}" is missing or null.`,
-              options
-            );
+        if (typeof dependencies === 'string') {
+          const dependencyName = dependencies;
+          if (!(dependencyName in object)) {
+            handleError(`Property "${dependencyName}" is missing.`, options);
           }
         }
       });
@@ -172,14 +180,8 @@ export const ValidateObject = (
     // If the dependency is a single string
     if (typeof modelProperty.depends === 'string') {
       const dependencyName = modelProperty.depends;
-      if (
-        !(dependencyName in object) ||
-        (object[dependencyName] !== 0 && !object[dependencyName])
-      ) {
-        handleError(
-          `Property "${dependencyName}" is missing or null.`,
-          options
-        );
+      if (!(dependencyName in object)) {
+        handleError(`Property "${dependencyName}" is missing.`, options);
       }
     }
   }
