@@ -13,9 +13,10 @@ jobs:
         uses: actions/setup-node@master
         with:
           node-version: 12
-          registry-url: https://registry.npmjs.org
+          registry-url: https://npm.pkg.github.com
+          scope: '@egdelgadillo'
       - name: Publish
         run: npm publish --access public
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_REPO_PUBLISH }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

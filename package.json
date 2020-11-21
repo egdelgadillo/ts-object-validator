@@ -3,7 +3,10 @@
   "version": "1.0.2",
   "description": "Verify not trusted object from external APIs using a model-based validator. This is part of my portfolio. Check it out at https://github.com/egdelgadillo",
   "main": "dist/index.js",
-  "repository": "git@github.com:egdelgadillo/ts-object-validator.git",
+  "repository": {
+    "type": "git",
+    "url":"git@github.com:egdelgadillo/ts-object-validator.git"
+  },
   "scripts": {
     "start": "tsc && node dist/example.js",
     "test": "jest"
