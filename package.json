@@ -1,19 +1,15 @@
 {
   "name": "@egdelgadillo/ts-object-parser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Verify not trusted object from external APIs using a model-based validator. This is part of my portfolio. Check it out at https://github.com/egdelgadillo",
   "main": "dist/index.js",
-  "repository": {
-    "type": "git",
-    "url":"git@github.com:egdelgadillo/ts-object-validator.git"
-  },
+  "types": "dist/index.d.ts",
   "scripts": {
-    "start": "tsc && node dist/example.js",
-    "test": "jest"
+    "start:example": "tsc && node dist/example.js",
+    "test": "jest",
+    "prepublish": "tsc"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.9",
@@ -21,5 +17,11 @@
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
   },
-  "dependencies": {}
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:egdelgadillo/ts-object-validator.git"
+  },
+  "keywords": [],
+  "author": "Emiliano Delgadillo <emilianog.delgadillo@gmail.com> (https://github.com/egdelgadillo)",
+  "license": "ISC"
 }

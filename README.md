@@ -23,7 +23,7 @@ The object validator is used to verify a _not trusted_ object, coming from exter
 
 - **Advanced Typescript**
 
-  This project features many advanced topics of the _Typescript_ superset, such as interfaces, ES6 loops, testing, etc. Although I already knew typescript before I started this project, it helped me settle some more advanced topics on the sibject.
+  This project features many advanced topics of the _Typescript_ superset, such as interfaces, ES6 loops, testing, etc. Although I already knew typescript before I started this project, it helped me settle some more advanced topics on the subject.
 
 - **Advanced Generic Interfaces**
 
@@ -77,7 +77,7 @@ ts-node src/app
 or by compiling it and run it using the built-in script:
 
 ```bash
-npm start
+npm run start:example
 ```
 
 For each property that does not follow the model requirements, the validator will print each error to the console:
