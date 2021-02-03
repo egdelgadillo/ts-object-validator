@@ -1,11 +1,15 @@
 import { ValidateObject } from '../../src/utils/Validator';
-import { ConvertToOptions } from '../../src/utils/ConvertToOptions';
+import { ConvertToOptions } from '../../src/types/ConvertToOptions';
 
 /**
  * Mocks
  */
 
-jest.spyOn(global.console, 'error');
+console.error = jest.fn();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 /**
  * Global Declarations
@@ -17,7 +21,7 @@ const validObject = {
   phone: '+595 888 7777',
   cellphone: '+595 888 7777',
   is_company: false,
-  comments: 'a',
+  comments: 'allowedValue',
 };
 
 /**
@@ -27,6 +31,9 @@ const validObject = {
 describe('ValidateObject', () => {
   describe('Property Validators', () => {
     const objectModel: ConvertToOptions<any> = {
+      id: {
+        allowed: false,
+      },
       name: {
         type: 'string',
         alwaysPresent: true,
@@ -36,6 +43,11 @@ describe('ValidateObject', () => {
         type: 'number',
         allowNull: true,
       },
+      comments: {
+        type: 'string',
+        allowNull: true,
+        allowedValues: ['allowedValue'],
+      },
     };
 
     it('should throw an error if invalid', () => {
@@ -43,43 +55,110 @@ describe('ValidateObject', () => {
         ValidateObject(
           { ...validObject, name: null },
           { ...objectModel },
-          { exitOnError: true }
+          { throwOnError: true }
         )
       ).toThrow();
     });
 
     it('should NOT throw an error even if invalid', () => {
       expect(() =>
-        ValidateObject(validObject, objectModel, { exitOnError: false })
+        ValidateObject(validObject, objectModel, { throwOnError: false })
       ).not.toThrow();
+    });
+
+    it('should fail if required property is not present', () => {
+      const requiredValidatorModel: ConvertToOptions<any> = {
+        name: {
+          type: 'string',
+          allowNull: false,
+          required: true,
+        },
+      };
+      const result1 = ValidateObject({}, requiredValidatorModel);
+      expect(result1).toEqual(null);
+
+      expect(() =>
+        ValidateObject({}, requiredValidatorModel, {
+          throwOnError: true,
+        })
+      ).toThrowError(
+        'Property "name" is required and should be present, but it is not.'
+      );
+      expect(() =>
+        ValidateObject({}, requiredValidatorModel, {
+          forceRequired: true,
+          throwOnError: true,
+        })
+      ).toThrowError(
+        'Property "name" is required and should be present, but it is not.'
+      );
+    });
+
+    it('should NOT fail if required property is not present', () => {
+      const notRequiredValidatorModel: ConvertToOptions<any> = {
+        name: {
+          type: 'string',
+          allowNull: false,
+          required: false,
+        },
+      };
+      const requiredValidatorModel: ConvertToOptions<any> = {
+        name: {
+          type: 'string',
+          allowNull: false,
+          required: true,
+        },
+      };
+
+      const result1 = ValidateObject({}, notRequiredValidatorModel, {
+        forceRequired: true,
+      });
+      expect(result1).not.toEqual(null);
+
+      const result2 = ValidateObject({}, notRequiredValidatorModel);
+      expect(result2).not.toEqual(null);
+
+      const result3 = ValidateObject({}, requiredValidatorModel, {
+        forceRequired: false,
+      });
+      expect(result3).not.toEqual(null);
+
+      expect(() =>
+        ValidateObject({}, notRequiredValidatorModel, {
+          throwOnError: true,
+          forceRequired: false,
+        })
+      ).not.toThrowError(
+        'Property "name" is required and should be present, but it is not.'
+      );
     });
 
     it('should not fail if object is valid', () => {
       expect(() =>
-        ValidateObject(validObject, objectModel, { exitOnError: true })
+        ValidateObject(validObject, objectModel, { throwOnError: true })
       ).not.toThrow();
     });
 
     it('should throw required property error', () => {
       expect(() =>
         ValidateObject({}, objectModel, {
-          exitOnError: true,
+          throwOnError: true,
         })
-      ).toThrowError('Property "name" is required but not present.');
+      ).toThrowError('Property "name" should always be present, but it is not');
     });
 
     it('should throw null property error', () => {
       expect(() =>
         ValidateObject({ ...validObject, name: null }, objectModel, {
-          exitOnError: true,
+          throwOnError: true,
         })
-      ).toThrowError('Property "name" is required and cannot be null.');
+      ).toThrowError('Property "name" cannot be null.');
     });
 
     it('should throw invalid type error', () => {
       expect(() =>
         ValidateObject({ ...validObject, name: 0 }, objectModel, {
-          exitOnError: true,
+          throwOnError: true,
         })
       ).toThrowError('Property "name" type is invalid.');
     });
@@ -87,7 +166,7 @@ describe('ValidateObject', () => {
     it('should throw empty property error', () => {
       expect(() =>
         ValidateObject({ ...validObject, name: '' }, objectModel, {
-          exitOnError: true,
+          throwOnError: true,
         })
       ).toThrowError('Property "name" is empty.');
     });
@@ -95,9 +174,30 @@ describe('ValidateObject', () => {
     it('should throw negative number error', () => {
       expect(() =>
         ValidateObject({ ...validObject, counter: -1 }, objectModel, {
-          exitOnError: true,
+          throwOnError: true,
         })
       ).toThrowError('Property "counter" cannot be a negative number.');
+    });
+
+    it('should throw forbidden property', () => {
+      expect(() =>
+        ValidateObject(
+          { ...validObject, id: '63b6d31a-52fa-4269-a1dd-7cb6dc39e67b' },
+          objectModel,
+          {
+            throwOnError: true,
+          }
+        )
+      ).toThrowError('Property "id" cannot be present.');
+    });
+
+    it('should throw if value is not allowed', () => {
+      expect(() =>
+        ValidateObject({ ...validObject, comments: 'invalid' }, objectModel, {
+          throwOnError: true,
+          forceRequired: false,
+        })
+      ).toThrowError('Property "comments" values are invalid.');
     });
   });
 
@@ -120,10 +220,10 @@ describe('ValidateObject', () => {
     it('should throw if none optional properties are present', () => {
       expect(() =>
         ValidateObject({ ...validObject }, optionalModel, {
-          exitOnError: true,
+          throwOnError: true,
         })
       ).toThrowError(
-        'None of the optional properties defined by "name" are present.'
+        'None of the optional properties required by "name" are present.'
       );
     });
 
@@ -132,7 +232,7 @@ describe('ValidateObject', () => {
         ValidateObject(
           { ...validObject, optional1: '' },
           { optionalModel },
-          { exitOnError: true }
+          { throwOnError: true }
         )
       ).not.toThrow();
 
@@ -140,7 +240,7 @@ describe('ValidateObject', () => {
         ValidateObject(
           { ...validObject, optional2: '' },
           { optionalModel },
-          { exitOnError: true }
+          { throwOnError: true }
         )
       ).not.toThrow();
     });
@@ -179,7 +279,7 @@ describe('ValidateObject', () => {
             { one: 1, two: 2, three: 3, four: 0 },
             dependencyModel,
             {
-              exitOnError: true,
+              throwOnError: true,
             }
           )
         ).toThrowError(
@@ -190,7 +290,7 @@ describe('ValidateObject', () => {
       it('should not throw if absent property is not present', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 3, four: 0 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).not.toThrow();
       });
@@ -198,7 +298,7 @@ describe('ValidateObject', () => {
       it('should throw missing dependency error', () => {
         expect(() =>
           ValidateObject({ one: 1, four: 0 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).toThrowError('Property "three" is missing.');
       });
@@ -206,7 +306,7 @@ describe('ValidateObject', () => {
       it('should throw required value invalid error', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 2, four: 0 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).toThrowError(
           'Property "one" requires "three" to have another value.'
@@ -216,7 +316,7 @@ describe('ValidateObject', () => {
       it('should not throw if required dependency is present and has correct value', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 3, four: 0 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).not.toThrow();
       });
@@ -224,7 +324,7 @@ describe('ValidateObject', () => {
       it('should throw required value invalid error', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 3, four: 4 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).toThrowError('Property "one" requires "four" to have another value.');
       });
@@ -232,7 +332,7 @@ describe('ValidateObject', () => {
       it('should not throw if dependency does not have forbidden value', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 3, four: 1 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).not.toThrow();
       });
@@ -265,13 +365,13 @@ describe('ValidateObject', () => {
       it('should throw missing dependency error', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 3, four: 0 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).toThrowError('Property "two" is missing.');
 
         expect(() =>
           ValidateObject({ one: 1, two: 2, four: 0 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).toThrowError('Property "three" is missing.');
       });
@@ -282,7 +382,7 @@ describe('ValidateObject', () => {
             { one: 1, two: 2, three: 1, four: 0 },
             dependencyModel,
             {
-              exitOnError: true,
+              throwOnError: true,
             }
           )
         ).toThrowError(
@@ -296,7 +396,7 @@ describe('ValidateObject', () => {
             { one: 1, two: 2, three: 3, four: 4 },
             dependencyModel,
             {
-              exitOnError: true,
+              throwOnError: true,
             }
           )
         ).toThrowError('Property "one" requires "four" to have another value.');
@@ -308,7 +408,7 @@ describe('ValidateObject', () => {
             { one: 1, two: 2, three: 3, four: 0 },
             dependencyModel,
             {
-              exitOnError: true,
+              throwOnError: true,
             }
           )
         ).not.toThrow();
@@ -328,7 +428,7 @@ describe('ValidateObject', () => {
       it('should throw missing dependency error', () => {
         expect(() =>
           ValidateObject({ one: 1 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).toThrowError('Property "two" is missing.');
       });
@@ -336,7 +436,7 @@ describe('ValidateObject', () => {
       it('should not throw error if all dependencies are present', () => {
         expect(() =>
           ValidateObject({ one: 1, two: 2 }, dependencyModel, {
-            exitOnError: true,
+            throwOnError: true,
           })
         ).not.toThrow();
       });

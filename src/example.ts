@@ -1,29 +1,36 @@
-import { ConvertToOptions } from './utils/ConvertToOptions';
+import { ConvertToOptions } from './types/ConvertToOptions';
 import { ValidateObject } from './utils/Validator';
 
 // We declare the object interface.
 interface IObject {
+  id: any;
   name: string;
   last_name?: string;
   phone?: string;
   cellphone?: string;
   is_company: boolean;
+  account_type: 'reviewer' | 'user';
   comments?: string;
 }
 
 // We create an object to validate.
 // We DO NOT trust this object. Comes from API.
 const object = {
+  id: '63b6d31a-52fa-4269-a1dd-7cb6dc39e67b',
   name: null,
   last_name: 'last name',
   phone: '+595 888 7777',
   cellphone: null,
   is_company: true,
+  account_type: 'reviewer',
   comments: 'a',
 };
 
 // We create a model to validate the object.
 const objectModel: ConvertToOptions<IObject> = {
+  id: {
+    allowed: false,
+  },
   name: {
     allowNull: true,
     type: 'string',
@@ -75,6 +82,11 @@ const objectModel: ConvertToOptions<IObject> = {
       'comments',
     ],
   },
+  account_type: {
+    allowNull: true,
+    type: 'string',
+    allowedValues: ['reviewer', 'user'],
+  },
   comments: {
     allowNull: true,
     type: 'string',
@@ -84,5 +96,5 @@ const objectModel: ConvertToOptions<IObject> = {
 
 // Call the validator with the object to test
 // and the model to validate it with.
-// (This will fail with 3 errors)
-ValidateObject(object, objectModel, { exitOnError: false });
+// (This will fail with 4 errors)
+ValidateObject(object, objectModel, { throwOnError: false });

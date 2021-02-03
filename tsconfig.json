@@ -4,16 +4,11 @@
     "module": "commonjs",
     "lib": ["es2015"],
     "outDir": "dist",
-    "strict": true, 
+    "strict": true,
     "declaration": true,
-    "sourceMap": true
-  }, 
-  "include": [
-    "./**/*.ts"
-  ],
-  "exclude": [
-    "node_modules/**/*",
-    "**/__tests__/**/*.ts",
-    "**/*.d.ts"
-  ]
+    "sourceMap": true,
+    "esModuleInterop": true
+  },
+  "include": ["./**/*.ts"],
+  "exclude": ["node_modules/**/*", "**/__tests__/**/*.ts", "**/*.d.ts"]
 }

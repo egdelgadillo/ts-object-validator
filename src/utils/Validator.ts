@@ -1,188 +1,269 @@
-import { ConvertToOptions } from './ConvertToOptions';
+import { ConvertToOptions } from '../types/ConvertToOptions';
+import isPlainObject from 'lodash.isplainobject';
 
-const handleError = (
-  errorMessage: string,
-  options?: { exitOnError: boolean }
+export const ValidateObject = <T extends { [key: string]: any }>(
+  testedObject: T,
+  validatorModel: ConvertToOptions<any>,
+  options?: { throwOnError?: boolean; forceRequired?: boolean }
 ) => {
-  if (options?.exitOnError) {
-    throw new Error(errorMessage);
-  }
-  console.error(`Error: ${errorMessage}`);
-};
+  try {
+    // Validate properties that should not be present
+    for (const validatedPropertyName in validatorModel) {
+      const validatorPropertyValues = validatorModel[validatedPropertyName];
+      const testedObjectPropertyValue = testedObject[validatedPropertyName];
 
-export const ValidateObject = (
-  object: { [key: string]: any },
-  model: ConvertToOptions<any>,
-  options?: { exitOnError: boolean }
-) => {
-  for (const propertyName in model) {
-    const modelProperty = model[propertyName];
-    const objectPropertyValue = object[propertyName];
-
-    // Check if required properties are present
-    if (
-      'alwaysPresent' in modelProperty &&
-      modelProperty.alwaysPresent &&
-      !(propertyName in object)
-    ) {
-      handleError(
-        `Property "${propertyName}" is required but not present.`,
-        options
-      );
-    }
-
-    // Check if required properties are null
-    if (
-      'alwaysPresent' in modelProperty &&
-      modelProperty.alwaysPresent &&
-      object[propertyName] == null
-    ) {
-      handleError(
-        `Property "${propertyName}" is required and cannot be null.`,
-        options
-      );
-    }
-
-    // Check if at least one of the optional properties is present
-    if (
-      propertyName in object &&
-      'oneOf' in modelProperty &&
-      modelProperty.oneOf &&
-      modelProperty.oneOf.length > 0
-    ) {
-      let presentProperties = false;
-      for (const propertyName of modelProperty.oneOf) {
-        if (propertyName in object) {
-          presentProperties = true;
-        }
-      }
-      if (!presentProperties) {
-        handleError(
-          `None of the optional properties defined by "${propertyName}" are present.`,
-          options
+      if (
+        'allowed' in validatorPropertyValues &&
+        validatedPropertyName in testedObject
+      ) {
+        throw new Error(
+          `Property "${validatedPropertyName}" cannot be present.`
         );
       }
-    }
 
-    // We skip properties if are not required or are not present
-    if (
-      !('alwaysPresent' in modelProperty && modelProperty.alwaysPresent) &&
-      !(propertyName in object)
-    ) {
-      continue;
-    }
+      // Validate required properties
+      if (
+        'required' in validatorPropertyValues &&
+        validatorPropertyValues.required &&
+        !(validatedPropertyName in testedObject)
+      ) {
+        if (
+          !options ||
+          !('forceRequired' in options) ||
+          options.forceRequired
+        ) {
+          throw new Error(
+            `Property "${validatedPropertyName}" is required and should be present, but it is not.`
+          );
+        }
+      }
 
-    const allowNull =
-      'alwaysPresent' in modelProperty ? false : modelProperty.allowNull;
+      // Validate always present properties are present
+      if (
+        'alwaysPresent' in validatorPropertyValues &&
+        !(validatedPropertyName in testedObject)
+      ) {
+        throw new Error(
+          `Property "${validatedPropertyName}" should always be present, but it is not.`
+        );
+      }
 
-    // Validate the property type
-    if (
-      typeof objectPropertyValue !== modelProperty.type &&
-      !(allowNull && objectPropertyValue == null)
-    ) {
-      handleError(`Property "${propertyName}" type is invalid.`, options);
-    }
+      // Validate properties that should not be null
+      if (
+        'allowNull' in validatorPropertyValues &&
+        validatedPropertyName in testedObject
+      ) {
+        // Test if the object property's value is null
+        if (
+          !validatorPropertyValues.allowNull &&
+          testedObjectPropertyValue == null
+        ) {
+          throw new Error(
+            `Property "${validatedPropertyName}" cannot be null.`
+          );
+        }
+      }
 
-    // Check if string properties are empty strings
-    if (modelProperty.type === 'string' && objectPropertyValue === '') {
-      // Check if String properties are empty
+      // Validate if at least one of the optional properties is present
+      if (
+        'oneOf' in validatorPropertyValues &&
+        validatedPropertyName in testedObject
+      ) {
+        let anyOptionalPresent = false;
+        for (const optionalProperties of validatorPropertyValues.oneOf!) {
+          if (optionalProperties in testedObject) {
+            anyOptionalPresent = true;
+          }
+        }
+        if (!anyOptionalPresent) {
+          throw new Error(
+            `None of the optional properties required by "${validatedPropertyName}" are present.`
+          );
+        }
+      }
 
-      handleError(`Property "${propertyName}" is empty.`, options);
-    }
+      // Validate if property type is correct
+      if (
+        'type' in validatorPropertyValues &&
+        validatedPropertyName in testedObject
+      ) {
+        if (
+          validatorPropertyValues.type === 'object' &&
+          !isPlainObject(testedObjectPropertyValue)
+        ) {
+          // Object types
 
-    // Check if number properties are negative numbers
-    if (modelProperty.type === 'number' && objectPropertyValue < 0) {
-      // Check if String properties are empty
-      handleError(
-        `Property "${propertyName}" cannot be a negative number.`,
-        options
-      );
-    }
-
-    // If the dependencies is an array or strings and/or objects
-    if (Array.isArray(modelProperty.depends)) {
-      modelProperty.depends.forEach((dependencies) => {
-        // If the dependency is an object of properties
-        if (typeof dependencies === 'object') {
-          for (const dependencyPropertyName in dependencies) {
-            const dependencyOptions = dependencies[dependencyPropertyName];
-            // Check if the dependency property is absent
+          if (
+            'allowNull' in validatorPropertyValues &&
+            !validatorPropertyValues.allowNull
+          ) {
+            throw new Error(
+              `Property "${validatedPropertyName}" type is invalid.`
+            );
+          }
+        } else if (
+          validatorPropertyValues.type === 'array' &&
+          !Array.isArray(testedObjectPropertyValue)
+        ) {
+          // Array types
+          if (
+            'allowNull' in validatorPropertyValues &&
+            !validatorPropertyValues.allowNull
+          ) {
+            throw new Error(
+              `Property "${validatedPropertyName}" type is invalid.`
+            );
+          }
+        } else {
+          // Normal types
+          if (
+            typeof testedObjectPropertyValue !== validatorPropertyValues.type
+          ) {
             if (
-              dependencyOptions.state === 'absent' &&
-              dependencyPropertyName in object
+              'allowNull' in validatorPropertyValues &&
+              !validatorPropertyValues.allowNull
             ) {
-              handleError(
-                `Property "${dependencyPropertyName}" should not be present for "${propertyName}" to be valid.`,
-                options
+              throw new Error(
+                `Property "${validatedPropertyName}" type is invalid.`
               );
             }
+          }
+        }
+      }
 
-            // Check if dependency meets required value
-            if (
-              dependencyOptions.state === 'present' &&
-              dependencyOptions.validate === 'ifValue'
-            ) {
-              // Check if the dependency is present
-              if (!(dependencyPropertyName in object)) {
-                handleError(
-                  `Property "${dependencyPropertyName}" is missing.`,
-                  options
-                );
-              }
+      // Validate if values are allowed
+      if (
+        'allowedValues' in validatorPropertyValues &&
+        validatedPropertyName in testedObject
+      ) {
+        const allowedValues = validatorPropertyValues.allowedValues as any[];
+        if (
+          allowedValues.length &&
+          !allowedValues.includes(testedObjectPropertyValue)
+        ) {
+          if (testedObjectPropertyValue !== null) {
+            throw new Error(
+              `Property "${validatedPropertyName}" values are invalid.`
+            );
+          }
+        }
+      }
 
-              // Check if the dependency has required value
-              if (
-                object[dependencyPropertyName] !== dependencyOptions.valueToTest
-              ) {
-                handleError(
-                  `Property "${propertyName}" requires "${dependencyPropertyName}" to have another value.`,
-                  options
-                );
+      // Check if string properties are empty
+      if (
+        typeof testedObjectPropertyValue === 'string' &&
+        testedObjectPropertyValue === ''
+      ) {
+        throw new Error(`Property "${validatedPropertyName}" is empty.`);
+      }
+
+      // Check if number properties are negative
+      if (
+        typeof testedObjectPropertyValue === 'number' &&
+        testedObjectPropertyValue < 0
+      ) {
+        throw new Error(
+          `Property "${validatedPropertyName}" cannot be a negative number..`
+        );
+      }
+
+      // Check dependencies
+      if ('depends' in validatorPropertyValues) {
+        const depends = validatorPropertyValues.depends;
+        // Check if 'depends' is an array of dependencies
+        if (Array.isArray(depends)) {
+          const dependenciesArray = depends;
+
+          // Loop all dependencies
+          for (const dependency of dependenciesArray) {
+            // Dependency is an object
+            if (typeof dependency === 'object') {
+              // Loop all dependency rules
+              for (const dependencyPropertyName in dependency) {
+                const dependencyOptions = dependency[dependencyPropertyName];
+
+                // Check if properties are absent
+                if (
+                  dependencyOptions.state === 'absent' &&
+                  dependencyPropertyName in testedObject
+                ) {
+                  throw new Error(
+                    `Property "${dependencyPropertyName}" should not be present for "${validatedPropertyName}" to be valid.`
+                  );
+                }
+
+                // Check if dependency meets required value
+                if (
+                  dependencyOptions.state === 'present' &&
+                  dependencyOptions.validate === 'ifValue'
+                ) {
+                  // Check if the dependency is present
+                  if (!(dependencyPropertyName in testedObject)) {
+                    throw new Error(
+                      `Property "${dependencyPropertyName}" is missing.`
+                    );
+                  }
+
+                  // Check if the dependency has required value
+                  if (
+                    testedObject[dependencyPropertyName] !==
+                    dependencyOptions.valueToTest
+                  ) {
+                    throw new Error(
+                      `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to have another value.`
+                    );
+                  }
+                }
+
+                // Check if dependency does not meet required  value
+                if (
+                  dependencyOptions.state === 'present' &&
+                  dependencyOptions.validate === 'ifNotValue'
+                ) {
+                  // Check if the dependency is present
+                  if (!(dependencyPropertyName in testedObject)) {
+                    throw new Error(
+                      `Property "${dependencyPropertyName}" is missing.`
+                    );
+                  }
+
+                  // Check if the dependency has not required value
+                  if (
+                    testedObject[dependencyPropertyName] ===
+                    dependencyOptions.valueToTest
+                  ) {
+                    throw new Error(
+                      `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to have another value.`
+                    );
+                  }
+                }
               }
             }
 
-            // Check if dependency does not meet required  value
-            if (
-              dependencyOptions.state === 'present' &&
-              dependencyOptions.validate === 'ifNotValue'
-            ) {
-              // Check if the dependency is present
-              if (!(dependencyPropertyName in object)) {
-                handleError(
-                  `Property "${dependencyPropertyName}" is missing.`,
-                  options
-                );
-              }
-
-              // Check if the dependency has not required value
-              if (
-                object[dependencyPropertyName] === dependencyOptions.valueToTest
-              ) {
-                handleError(
-                  `Property "${propertyName}" requires "${dependencyPropertyName}" to have another value.`,
-                  options
-                );
+            // Dependency is a string
+            if (typeof dependency === 'string') {
+              if (!(dependency in testedObject)) {
+                throw new Error(`Property "${dependency}" is missing.`);
               }
             }
           }
         }
 
-        // Check if the dependency is a string
-        if (typeof dependencies === 'string') {
-          const dependencyName = dependencies;
-          if (!(dependencyName in object)) {
-            handleError(`Property "${dependencyName}" is missing.`, options);
+        // Check if 'depends' is a single string
+        else if (typeof depends === 'string') {
+          if (!(depends in testedObject)) {
+            throw new Error(`Property "${depends}" is missing.`);
           }
         }
-      });
-    }
-
-    // If the dependency is a single string
-    if (typeof modelProperty.depends === 'string') {
-      const dependencyName = modelProperty.depends;
-      if (!(dependencyName in object)) {
-        handleError(`Property "${dependencyName}" is missing.`, options);
       }
     }
+
+    return testedObject;
+  } catch (err) {
+    if (options?.throwOnError) {
+      throw err;
+    }
+    console.error(err.message);
   }
+  return null;
 };

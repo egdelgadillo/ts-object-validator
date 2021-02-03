@@ -5,9 +5,16 @@ type IOptionsNullOrRequired =
   | { allowNull: boolean };
 
 interface IOptionsOptions<T> {
-  type: 'string' | 'number' | 'boolean' | string[] | number[];
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  allowedValues?: string[] | number[];
+  required?: boolean;
   depends?: IDepends<T>;
   oneOf?: (keyof T)[];
 }
+type IOptionsForbidden = {
+  allowed: false;
+};
 
-export type IOptions<T> = IOptionsNullOrRequired & IOptionsOptions<T>;
+export type IOptions<T> =
+  | IOptionsForbidden
+  | (IOptionsNullOrRequired & IOptionsOptions<T>);

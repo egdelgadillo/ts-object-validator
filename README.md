@@ -23,7 +23,7 @@ The object validator is used to verify a _not trusted_ object, coming from exter
 
 - **Advanced Typescript**
 
-  This project features many advanced topics of the _Typescript_ superset, such as interfaces, ES6 loops, testing, etc. Although I already knew typescript before I started this project, it helped me settle some more advanced topics on the sibject.
+  This project features many advanced topics of the _Typescript_ superset, such as interfaces, ES6 loops, testing, etc. Although I already knew typescript before I started this project, it helped me settle some more advanced topics on the subject.
 
 - **Advanced Generic Interfaces**
 
@@ -50,7 +50,7 @@ The object validator is used to verify a _not trusted_ object, coming from exter
 1. Install the package
 
 ```bash
-npm install --save @egdelgadillo/ts-object-validator
+npm install --save @egdelgadillo/ts-object-validator@^2.0.0
 ```
 
 2. We import the required methods and types
@@ -68,37 +68,32 @@ import {
 
 5. Call the ValidateObject method with the object to verify and the model it should follow
 
-**An example of an object and the model is provided in the `example.ts` file**. You can run it using **ts-node**:
+**An example of an object and the model is provided in the `example.ts` file**:
 
 ```bash
-ts-node src/app
-```
-
-or by compiling it and run it using the built-in script:
-
-```bash
-npm start
+npm run start:example
 ```
 
 For each property that does not follow the model requirements, the validator will print each error to the console:
 
 ```bash
+Error: Property "id" cannot be present.
 Error: Property "last_name" requires "is_company" to have another value
 Error: Property "phone" requires "cellphone" to have another value
 Error: Property "is_company" requires "name" to have another value
 ```
 
-Ths behavior can be changed by passing the `{exitOnError: true}` options to the validator:
+Ths behavior can be changed by passing the `{throwOnError: true}` options to the validator:
 
 ```bash
 Validator.js:6
   throw new Error(errorMessage);
         ^
 
-Error: Property "last_name" requires "is_company" to have another value.
-  at handleError (Validator.js:6:15)
+Error: Property "id" cannot be present.
+  at Object.ErrorHandler (ErrorHandler.js:6:15)
   ...
-  at Function.Module._load (internal/modules/cjs/loader.js:878:14)
+  at internal/main/run_main_module.js:17:47
 ```
 
 **For more information go to the [Examples](#examples) section.**
@@ -113,9 +108,10 @@ The _hauptspeise_ of this project is the creation of the **model**. This will in
 
 The model options for each interface property are:
 
-- `alwaysPresent`: **Required**: This ensures the property must always be present on the object otherwise it will console log an error. **Not required if `allowNull` is provided.** (Although both can be used at the same time no matter what)
-- `allowNull`: **Required**: This allows the object property to be `null`. **Not required if `alwaysPresent` is provided.** (See `alwaysPresent` for more information)
+- `alwaysPresent`: **Required if `allowNull` is not provided**: This ensures the property must always be present on the object otherwise this will cause an error.
+- `allowNull`: **Required if `alwaysPresent` is not provided**: This allows the object property to be `null`.
 - `type`: The type the property should have. This includes a wide range of possible values (See the type for more information)
+- `values`: An array of strings or numbers with the possible values the property can have. If the property does not contain any of this values this will cause an error.
 - `depends`: This is the most complex of all the properties. By default it only accepts properties that are present on the object interface. It has various possible values:
 
   - **A single string**: The property that is indicated here will have to be present, although it will not be checked for valid values.
@@ -141,14 +137,14 @@ The model options for each interface property are:
 The **ValidateObject** method takes 2 required arguments as well as another optional argument:
 
 ```typescript
-ValidateObject(object, model, { exitOnError: false });
+ValidateObject(object, model, { throwOnError: false });
 ```
 
 The first argument, the **object**, is the object we want to check or verify. This should be an object which origin we do not trust (Or should not, as good practices), for example from external APIs or user input APIs.
 
 The second argument, the **model**, is the model we configured to test the object with, which holds all the business rules we want it to follow.
 
-The third and **optional** argument, the **options**, can have only 1 property: `exitOnError` which is used to configure wether the validator should print the errors to the console or throw to the first error it encounters while validating the object. The **default value** is `false`, which means that if not provided, the validator will only print the errors to the console (if any) without throwing.
+The third and **optional** argument, the **options**, can have only 1 property: `throwOnError` which is used to configure wether the validator should print the errors to the console or throw to the first error it encounters while validating the object. The **default value** is `false`, which means that if not provided, the validator will only print the errors to the console (if any) without throwing.
 
 ## Examples
 
@@ -214,7 +210,7 @@ const objectToTest = { name: 'John', last_name: 'Doe', number: 42, comments: "Th
 ValidateObject(objectToTest, modelExample);
 
 // Will throw to the first error it encounters while validating
-ValidateObject(objectToTest, modelExample, { exitOnError: true });
+ValidateObject(objectToTest, modelExample, { throwOnError: true });
 ```
 
 ## Collaborating

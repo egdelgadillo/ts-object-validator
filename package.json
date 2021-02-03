@@ -1,14 +1,14 @@
 {
   "name": "@egdelgadillo/ts-object-parser",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Verify not trusted object from external APIs using a model-based validator. This is part of my portfolio. Check it out at https://github.com/egdelgadillo",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url":"git@github.com:egdelgadillo/ts-object-validator.git"
+    "url": "git@github.com:egdelgadillo/ts-object-validator.git"
   },
   "scripts": {
-    "start": "tsc && node dist/example.js",
+    "start:example": "tsc && node dist/example.js",
     "test": "jest"
   },
   "keywords": [],
@@ -21,5 +21,8 @@
     "ts-jest": "^26.4.4",
     "typescript": "^4.1.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/lodash.isplainobject": "^4.0.6",
+    "lodash.isplainobject": "^4.0.6"
+  }
 }
