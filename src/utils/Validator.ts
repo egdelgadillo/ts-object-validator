@@ -206,11 +206,23 @@ export const ValidateObject = <T extends { [key: string]: any }>(
 
                   // Check if the dependency has required value
                   if (
+                    'valueToTest' in dependencyOptions &&
                     testedObject[dependencyPropertyName] !==
-                    dependencyOptions.valueToTest
+                      dependencyOptions.valueToTest
                   ) {
                     throw new Error(
-                      `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to have another value.`
+                      `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to be equal to another value.`
+                    );
+                  }
+
+                  // Check if dependency has required property value
+                  if (
+                    'propertyToTest' in dependencyOptions &&
+                    testedObject[dependencyPropertyName] !==
+                      testedObject[dependencyOptions.propertyToTest as keyof T]
+                  ) {
+                    throw new Error(
+                      `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to be equal to another value.`
                     );
                   }
                 }
@@ -229,8 +241,20 @@ export const ValidateObject = <T extends { [key: string]: any }>(
 
                   // Check if the dependency has not required value
                   if (
+                    'valueToTest' in dependencyOptions &&
                     testedObject[dependencyPropertyName] ===
-                    dependencyOptions.valueToTest
+                      dependencyOptions.valueToTest
+                  ) {
+                    throw new Error(
+                      `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to have another value.`
+                    );
+                  }
+
+                  // Check if dependency has required property value
+                  if (
+                    'propertyToTest' in dependencyOptions &&
+                    testedObject[dependencyPropertyName] ===
+                      testedObject[dependencyOptions.propertyToTest as keyof T]
                   ) {
                     throw new Error(
                       `Property "${validatedPropertyName}" requires "${dependencyPropertyName}" to have another value.`

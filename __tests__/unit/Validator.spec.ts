@@ -309,7 +309,7 @@ describe('ValidateObject', () => {
             throwOnError: true,
           })
         ).toThrowError(
-          'Property "one" requires "three" to have another value.'
+          'Property "one" requires "three" to be equal to another value.'
         );
       });
 
@@ -362,6 +362,27 @@ describe('ValidateObject', () => {
         },
       };
 
+      const propertyDependencyModel: ConvertToOptions<any> = {
+        one: {
+          type: 'number',
+          allowNull: false,
+          depends: [
+            {
+              two: {
+                state: 'present',
+                validate: 'ifValue',
+                propertyToTest: 'one',
+              },
+              three: {
+                state: 'present',
+                validate: 'ifNotValue',
+                propertyToTest: 'four',
+              },
+            },
+          ],
+        },
+      };
+
       it('should throw missing dependency error', () => {
         expect(() =>
           ValidateObject({ one: 1, three: 3, four: 0 }, dependencyModel, {
@@ -386,7 +407,7 @@ describe('ValidateObject', () => {
             }
           )
         ).toThrowError(
-          'Property "one" requires "three" to have another value.'
+          'Property "one" requires "three" to be equal to another value.'
         );
       });
 
@@ -412,6 +433,30 @@ describe('ValidateObject', () => {
             }
           )
         ).not.toThrow();
+      });
+
+      it('should throw invalid dependency value error if not equal to property', () => {
+        expect(() =>
+          ValidateObject({ one: 1, two: 2 }, propertyDependencyModel, {
+            throwOnError: true,
+          })
+        ).toThrowError(
+          'Property "one" requires "two" to be equal to another value.'
+        );
+      });
+
+      it('should throw invalid dependency value error if is equal to property', () => {
+        expect(() =>
+          ValidateObject(
+            { one: 1, two: 1, three: 3, four: 3 },
+            propertyDependencyModel,
+            {
+              throwOnError: true,
+            }
+          )
+        ).toThrowError(
+          'Property "one" requires "three" to have another value.'
+        );
       });
     });
 
